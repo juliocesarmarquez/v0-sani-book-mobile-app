@@ -6,7 +6,7 @@ import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Upload, X, FileText, ImageIcon, Film, File } from "lucide-react"
-import { uploadToIPFS } from "@/lib/web3-storage"
+import { uploadFileToIPFS } from "@/app/actions/upload-to-ipfs"
 
 interface FileUploadProps {
   onUploadComplete: (fileData: any) => void
@@ -22,7 +22,6 @@ export function FileUpload({ onUploadComplete, onUploadStart, category, tags }: 
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Simular progreso de carga
   const simulateProgress = () => {
     setUploadProgress(0)
     const interval = setInterval(() => {
@@ -65,7 +64,7 @@ export function FileUpload({ onUploadComplete, onUploadStart, category, tags }: 
 
   const handleUpload = async () => {
     if (!selectedFile) {
-      setError("Por favor selecciona un archivo primero")
+      setError("Please select a file first")
       return
     }
 
@@ -74,20 +73,18 @@ export function FileUpload({ onUploadComplete, onUploadStart, category, tags }: 
       setIsUploading(true)
       onUploadStart()
 
-      // Simular progreso mientras se sube el archivo
       const progressInterval = simulateProgress()
 
-      // Subir archivo a IPFS usando web3.storage
-      const result = await uploadToIPFS(selectedFile)
+      const formData = new FormData()
+      formData.append("file", selectedFile)
 
-      // Detener la simulación de progreso
+      const result = await uploadFileToIPFS(formData)
+
       clearInterval(progressInterval)
 
       if (result.success) {
-        // Completar el progreso
         setUploadProgress(100)
 
-        // Preparar los metadatos del archivo
         const fileData = {
           ...result,
           category,
@@ -95,29 +92,26 @@ export function FileUpload({ onUploadComplete, onUploadStart, category, tags }: 
           date: new Date().toISOString().split("T")[0],
         }
 
-        // Notificar que la carga se completó
         onUploadComplete(fileData)
 
-        // Limpiar después de un breve retraso
         setTimeout(() => {
           setIsUploading(false)
           setUploadProgress(0)
           clearSelectedFile()
         }, 1500)
       } else {
-        setError(result.error || "Error al subir el archivo")
+        setError(result.error || "Error uploading file")
         setIsUploading(false)
         setUploadProgress(0)
       }
     } catch (err) {
-      setError("Error inesperado al subir el archivo")
+      setError("Unexpected error uploading file")
       setIsUploading(false)
       setUploadProgress(0)
-      console.error("Error en la subida:", err)
+      console.error("[v0] Upload error:", err)
     }
   }
 
-  // Determinar el icono según el tipo de archivo
   const getFileIcon = () => {
     if (!selectedFile) return <Upload className="w-12 h-12 text-gray-400" />
 
@@ -162,7 +156,7 @@ export function FileUpload({ onUploadComplete, onUploadStart, category, tags }: 
                   <button
                     onClick={clearSelectedFile}
                     className="text-red-500 hover:text-red-700"
-                    aria-label="Eliminar archivo seleccionado"
+                    aria-label="Remove selected file"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -172,8 +166,8 @@ export function FileUpload({ onUploadComplete, onUploadStart, category, tags }: 
             </div>
           ) : (
             <>
-              <h3 className="text-lg font-medium mt-4 mb-2">Arrastra tus archivos médicos aquí</h3>
-              <p className="text-gray-500 mb-4">o haz clic para seleccionar</p>
+              <h3 className="text-lg font-medium mt-4 mb-2">Drag your medical files here</h3>
+              <p className="text-gray-500 mb-4">or click to select</p>
             </>
           )}
 
@@ -181,18 +175,18 @@ export function FileUpload({ onUploadComplete, onUploadStart, category, tags }: 
             {!isUploading ? (
               <div className="flex gap-4">
                 <Button onClick={() => fileInputRef.current?.click()} variant="outline" disabled={isUploading}>
-                  Seleccionar archivo
+                  Select File
                 </Button>
 
                 {selectedFile && (
                   <Button onClick={handleUpload} className="bg-blue-600 hover:bg-blue-700" disabled={isUploading}>
-                    Subir a IPFS
+                    Upload to IPFS
                   </Button>
                 )}
               </div>
             ) : (
               <div className="w-full max-w-md">
-                <p className="text-sm mb-1 text-blue-700 font-medium">Subiendo a IPFS...</p>
+                <p className="text-sm mb-1 text-blue-700 font-medium">Uploading to IPFS...</p>
                 <Progress value={uploadProgress} className="w-full" />
               </div>
             )}

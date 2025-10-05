@@ -217,12 +217,21 @@ export default function SaniBookApp() {
       try {
         await window.ethereum.request({ method: "eth_requestAccounts" })
         setIsConnected(true)
-      } catch (error) {
-        console.error("User rejected the connection request", error)
-        setWalletError("Connection rejected. Please try again.")
+      } catch (error: any) {
+        if (error.code === 4001 || error.message?.includes("rejected")) {
+          // User rejected the connection request - this is normal
+          console.log("[v0] User declined wallet connection")
+          setWalletError(
+            "You declined the connection request. Click 'Get Started' to try again, or use 'Preview Demo' to explore without connecting.",
+          )
+        } else {
+          // Actual error occurred
+          console.error("[v0] Wallet connection error:", error)
+          setWalletError("Failed to connect wallet. Please try again or check your wallet extension.")
+        }
       }
     } else {
-      console.error("No ethereum wallet detected")
+      console.log("[v0] No ethereum wallet detected")
       setWalletError("No wallet detected. Please install MetaMask or another Web3 wallet.")
     }
   }
