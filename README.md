@@ -18,25 +18,6 @@ SaniBook is a decentralized medical records platform built on Web3 technology. S
 - 📊 **Analytics Dashboard**: Track uploads and storage usage
 - 🔒 **End-to-End Encryption**: Your data stays private
 
-## Deployment
-
-Your project is live at:
-
-**[https://vercel.com/libertadorsmio-4241s-projects/v0-sani-book](https://vercel.com/libertadorsmio-4241s-projects/v0-sani-book)**
-
-## Build your app
-
-Continue building your app on:
-
-**[https://v0.dev/chat/projects/1uj00igXMgL](https://v0.dev/chat/projects/1uj00igXMgL)**
-
-## How It Works
-
-1. Create and modify your project using [v0.dev](https://v0.dev)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
-
 ## Tech Stack
 
 - **Next.js 14** - React framework
